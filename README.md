@@ -1,15 +1,50 @@
 # flutter_barcode_keyboard_listener
 
-A new Flutter project.
+Plugin for managing QR and BAR code reading from an external device.
 
-## Getting Started
+## Important
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/developing-packages/),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
+**THIS PACKAGE WILL WORK ONLY IN ANDROID!**
 
-For help getting started with Flutter development, view the
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+---
 
+## Class Name
+
+```dart
+BarcodeListener
+```
+
+## Variables
+
+```dart
+BarcodeScannedCallback onBarcodeScannedCallback //<- Function(String barcode)
+Duration bufferDuration
+bool useKeyDownEvent
+```
+
+## Example
+
+```dart
+@override
+void initState() {
+    BarcodeListener(
+        onBarcodeScannedCallback:
+            (String value) => setState(() {
+                print(value);
+            },
+        ),
+    );
+}
+```
+
+## Installation
+
+```bash
+flutter pub add flutter_barcode_keyboard_listener
+```
+
+## Tested Devices
+
+```bash
+Sunmi Blink
+```
