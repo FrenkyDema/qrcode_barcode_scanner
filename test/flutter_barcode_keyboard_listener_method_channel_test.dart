@@ -3,8 +3,8 @@ import 'package:flutter_barcode_keyboard_listener/flutter_barcode_keyboard_liste
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  FlutterBarcodeKeyboardListener platform = FlutterBarcodeKeyboardListener();
-  const MethodChannel channel = MethodChannel('flutter_barcode_keyboard_listener');
+  const MethodChannel channel =
+      MethodChannel('flutter_barcode_keyboard_listener');
 
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -16,9 +16,5 @@ void main() {
 
   tearDown(() {
     channel.setMockMethodCallHandler(null);
-  });
-
-  test('getPlatformVersion', () async {
-    expect(await platform.getPlatformVersion(), '42');
   });
 }
