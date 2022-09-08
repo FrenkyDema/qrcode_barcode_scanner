@@ -1,3 +1,3 @@
 ## 0.0.1
 
-* TODO: Describe initial release.
+Implementation of basic functions, listener and callback management.
