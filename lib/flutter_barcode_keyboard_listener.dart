@@ -1,12 +1,110 @@
+library flutter_barcode_keyboard_listener;
+
 import 'dart:async';
 
 import 'package:flutter/services.dart';
 
-/// Plugin that wraps Sunmi Android SDK for integrated barcode scanner
-class FlutterBarcodeKeyboardListener {
-  static const MethodChannel _channel = MethodChannel('flutter_barcode_keyboard_listener');
+typedef BarcodeScannedCallback = void Function(String barcode);
 
-  Future<String?> getPlatformVersion() async {
-    return (await _channel.invokeMethod('getPlatformVersion'));
+const Duration aSecond = Duration(seconds: 1);
+const Duration hundredMs = Duration(milliseconds: 100);
+const String lineFeed = '\n';
+
+/// Listening keyboard input from barcode scanner
+///
+/// Listens to keyboard input. Upon detection of scanning button press,
+/// records incoming sequence of presses, after the scanning button was released
+/// provides recorded data as a string of scanning result
+class BarcodeListener {
+  final BarcodeScannedCallback _onBarcodeScannedCallback;
+  final Duration _bufferDuration;
+  final bool _useKeyDownEvent;
+
+  BarcodeListener({
+    bool useKeyDownEvent = false,
+    required BarcodeScannedCallback onBarcodeScannedCallback,
+    Duration bufferDuration = hundredMs,
+  })  : _onBarcodeScannedCallback = onBarcodeScannedCallback,
+        _bufferDuration = bufferDuration,
+        _useKeyDownEvent = useKeyDownEvent {
+    RawKeyboard.instance.addListener(_keyBoardCallback);
+    _keyboardSubscription =
+        _controller.stream.where((char) => char != null).listen(onKeyEvent);
+  }
+
+  List<String> _scannedChars = [];
+  DateTime? _lastScannedCharCodeTime;
+  late StreamSubscription<String?> _keyboardSubscription;
+
+  final _controller = StreamController<String?>();
+
+  void onKeyEvent(String? char) {
+    //remove any pending characters older than bufferDuration value
+    checkPendingCharCodesToClear();
+    _lastScannedCharCodeTime = DateTime.now();
+    if (char == lineFeed) {
+      _onBarcodeScannedCallback.call(_scannedChars.join());
+      resetScannedCharCodes();
+    } else {
+      //add character to list of scanned characters;
+      _scannedChars.add(char!);
+    }
+  }
+
+  void checkPendingCharCodesToClear() {
+    if (_lastScannedCharCodeTime != null) {
+      if (_lastScannedCharCodeTime!
+          .isBefore(DateTime.now().subtract(_bufferDuration))) {
+        resetScannedCharCodes();
+      }
+    }
+  }
+
+  void resetScannedCharCodes() {
+    _lastScannedCharCodeTime = null;
+    _scannedChars = [];
+  }
+
+  void addScannedCharCode(String charCode) {
+    _scannedChars.add(charCode);
+  }
+
+  void _keyBoardCallback(RawKeyEvent keyEvent) {
+    if (keyEvent.logicalKey.keyId > 255 &&
+        keyEvent.data.logicalKey != LogicalKeyboardKey.enter) return;
+    if ((!_useKeyDownEvent && keyEvent is RawKeyUpEvent) ||
+        (_useKeyDownEvent && keyEvent is RawKeyDownEvent)) {
+      if (keyEvent.data is RawKeyEventDataAndroid) {
+        _controller.sink.add(String.fromCharCode(
+            ((keyEvent.data) as RawKeyEventDataAndroid).codePoint));
+      } else if (keyEvent.data is RawKeyEventDataFuchsia) {
+        _controller.sink.add(String.fromCharCode(
+            ((keyEvent.data) as RawKeyEventDataFuchsia).codePoint));
+      } else if (keyEvent.data.logicalKey == LogicalKeyboardKey.enter) {
+        _controller.sink.add(lineFeed);
+      } else if (keyEvent.data is RawKeyEventDataWeb) {
+        _controller.sink.add(((keyEvent.data) as RawKeyEventDataWeb).keyLabel);
+      } else if (keyEvent.data is RawKeyEventDataLinux) {
+        _controller.sink
+            .add(((keyEvent.data) as RawKeyEventDataLinux).keyLabel);
+      } else if (keyEvent.data is RawKeyEventDataWindows) {
+        _controller.sink.add(String.fromCharCode(
+            ((keyEvent.data) as RawKeyEventDataWindows).keyCode));
+      } else if (keyEvent.data is RawKeyEventDataMacOs) {
+        _controller.sink
+            .add(((keyEvent.data) as RawKeyEventDataMacOs).characters);
+      } else if (keyEvent.data is RawKeyEventDataIos) {
+        _controller.sink
+            .add(((keyEvent.data) as RawKeyEventDataIos).characters);
+      } else {
+        _controller.sink.add(keyEvent.character);
+      }
+    }
+  }
+
+  void dispose() {
+    _keyboardSubscription.cancel();
+    _controller.close();
+    RawKeyboard.instance.removeListener(_keyBoardCallback);
   }
 }
