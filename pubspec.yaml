@@ -1,6 +1,6 @@
 name: flutter_barcode_keyboard_listener
 description: Demonstrates how to use the flutter_barcode_keyboard_listener plugin.
-version: 0.0.1
+version: 0.0.2
 repository: "https://github.com/FrenkyDema/flutter_barcode_keyboard_listener"
 
 
@@ -11,7 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  plugin_platform_interface: ^2.1.2
+  plugin_platform_interface: ^2.1.3
 
 dev_dependencies:
   flutter_test:
