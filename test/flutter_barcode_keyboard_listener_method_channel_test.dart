@@ -1,5 +1,4 @@
 import 'package:flutter/services.dart';
-import 'package:flutter_barcode_keyboard_listener/flutter_barcode_keyboard_listener.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
