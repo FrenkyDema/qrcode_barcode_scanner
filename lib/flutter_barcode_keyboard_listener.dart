@@ -38,6 +38,7 @@ class BarcodeListener {
 
   final _controller = StreamController<String?>();
 
+  /// Function call on Key press event
   void onKeyEvent(String? char) {
     //remove any pending characters older than bufferDuration value
     checkPendingCharCodesToClear();
@@ -51,6 +52,7 @@ class BarcodeListener {
     }
   }
 
+  /// Check for pending char codes to clear
   void checkPendingCharCodesToClear() {
     if (_lastScannedCharCodeTime != null) {
       if (_lastScannedCharCodeTime!
@@ -60,15 +62,18 @@ class BarcodeListener {
     }
   }
 
+  /// Reset the scanned char codes
   void resetScannedCharCodes() {
     _lastScannedCharCodeTime = null;
     _scannedChars = [];
   }
 
+  /// Add scanned char code
   void addScannedCharCode(String charCode) {
     _scannedChars.add(charCode);
   }
 
+  /// Call back of the key board
   void _keyBoardCallback(RawKeyEvent keyEvent) {
     if (keyEvent.logicalKey.keyId > 255 &&
         keyEvent.data.logicalKey != LogicalKeyboardKey.enter) return;
@@ -102,6 +107,7 @@ class BarcodeListener {
     }
   }
 
+  /// Dispose function
   void dispose() {
     _keyboardSubscription.cancel();
     _controller.close();

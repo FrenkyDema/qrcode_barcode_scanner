@@ -97,6 +97,7 @@ obj/
 .idea/jarRepositories.xml
 .idea/navEditor.xml
 .idea/discord.xml
+.idea/intellij-javadocs-4.0.1.xml
 
 # Legacy Eclipse project files
 .classpath
@@ -136,3 +137,5 @@ fabric.properties
 !/gradle/wrapper/gradle-wrapper.jar
 
 # End of https://www.toptal.com/developers/gitignore/api/androidstudio
+
+.dart_tool/
