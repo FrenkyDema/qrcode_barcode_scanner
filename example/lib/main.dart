@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_barcode_keyboard_listener/flutter_barcode_keyboard_listener.dart';
+import 'package:qrcode_barcode_scanner/qrcode_barcode_scanner.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,9 +18,9 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    BarcodeListener(
+    QrcodeBarcodeScanner(
       onBarcodeScannedCallback: (String value) => setState(
-        () {
+            () {
           _scanValue = value;
         },
       ),

@@ -17,9 +17,9 @@ BarcodeListener
 ## Variables
 
 ```dart
-BarcodeScannedCallback onBarcodeScannedCallback //<- Function(String barcode)
-Duration bufferDuration
-bool useKeyDownEvent
+BarcodeScannedCallback onBarcodeScannedCallback; //<- Function(String barcode)
+Duration bufferDuration;
+bool useKeyDownEvent;
 ```
 
 ## Example
@@ -27,13 +27,14 @@ bool useKeyDownEvent
 ```dart
 @override
 void initState() {
-    BarcodeListener(
-        onBarcodeScannedCallback:
-            (String value) => setState(() {
-                print(value);
-            },
+  BarcodeListener(
+    onBarcodeScannedCallback:
+        (String value) =>
+        setState(() {
+          print(value);
+        },
         ),
-    );
+  );
 }
 ```
 

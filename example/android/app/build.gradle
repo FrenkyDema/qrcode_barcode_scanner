@@ -36,7 +36,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.example.flutter_barcode_keyboard_listener_example"
+        applicationId "com.example.qrcode_barcode_scanner_example"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration.
         minSdkVersion flutter.minSdkVersion
@@ -52,7 +52,6 @@ android {
             signingConfig signingConfigs.debug
         }
     }
-    namespace 'com.example.flutter_barcode_keyboard_listener_example'
 }
 
 flutter {
