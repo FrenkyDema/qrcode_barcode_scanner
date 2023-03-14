@@ -1,7 +1,7 @@
 import 'dart:async';
-
+import 'dart:ui' as ui;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-
 
 typedef ScannedCallback = void Function(String scannedCode);
 
@@ -26,6 +26,8 @@ class QrcodeBarcodeScanner {
   })  : _onBarcodeScannedCallback = onBarcodeScannedCallback,
         _bufferDuration = bufferDuration,
         _useKeyDownEvent = useKeyDownEvent {
+    final keyboardLocale = ui.window.locale.languageCode;
+    print('Keyboard language: $keyboardLocale');
     RawKeyboard.instance.addListener(_keyBoardCallback);
     _keyboardSubscription =
         _controller.stream.where((char) => char != null).listen(onKeyEvent);
@@ -39,6 +41,7 @@ class QrcodeBarcodeScanner {
 
   /// Function call on Key press event
   void onKeyEvent(String? char) {
+    debugPrint(char);
     //remove any pending characters older than bufferDuration value
     checkPendingCharCodesToClear();
     _lastScannedCharCodeTime = DateTime.now();
