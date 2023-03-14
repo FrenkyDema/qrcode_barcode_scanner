@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:qrcode_barcode_scanner/qrcode_barcode_scanner.dart';
 import 'package:qrcode_barcode_scanner/qrcode_barcode_scanner_platform_interface.dart';
 import 'package:qrcode_barcode_scanner/qrcode_barcode_scanner_method_channel.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
