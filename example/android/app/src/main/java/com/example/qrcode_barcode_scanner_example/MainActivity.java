@@ -1,4 +1,4 @@
-package com.example.flutter_barcode_keyboard_listener_example;
+package com.example.qrcode_barcode_scanner_example;
 
 import io.flutter.embedding.android.FlutterActivity;
 

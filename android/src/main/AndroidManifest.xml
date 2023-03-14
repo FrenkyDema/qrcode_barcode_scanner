@@ -1,1 +1,3 @@
-<manifest package="com.example.flutter_barcode_keyboard_listener"></manifest>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="com.example.qrcode_barcode_scanner">
+</manifest>

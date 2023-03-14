@@ -1,4 +1,4 @@
-group 'com.example.flutter_barcode_keyboard_listener'
+group 'com.example.qrcode_barcode_scanner'
 version '1.0'
 
 buildscript {

@@ -1,10 +1,9 @@
-library flutter_barcode_keyboard_listener;
-
 import 'dart:async';
 
 import 'package:flutter/services.dart';
 
-typedef BarcodeScannedCallback = void Function(String barcode);
+
+typedef ScannedCallback = void Function(String scannedCode);
 
 const Duration aSecond = Duration(seconds: 1);
 const Duration hundredMs = Duration(milliseconds: 100);
@@ -15,14 +14,14 @@ const String lineFeed = '\n';
 /// Listens to keyboard input. Upon detection of scanning button press,
 /// records incoming sequence of presses, after the scanning button was released
 /// provides recorded data as a string of scanning result
-class BarcodeListener {
-  final BarcodeScannedCallback _onBarcodeScannedCallback;
+class QrcodeBarcodeScanner {
+  final ScannedCallback _onBarcodeScannedCallback;
   final Duration _bufferDuration;
   final bool _useKeyDownEvent;
 
-  BarcodeListener({
+  QrcodeBarcodeScanner({
     bool useKeyDownEvent = false,
-    required BarcodeScannedCallback onBarcodeScannedCallback,
+    required ScannedCallback onBarcodeScannedCallback,
     Duration bufferDuration = hundredMs,
   })  : _onBarcodeScannedCallback = onBarcodeScannedCallback,
         _bufferDuration = bufferDuration,
