@@ -16,11 +16,13 @@ const String lineFeed = '\n';
 /// records incoming sequence of presses, after the scanning button was released
 /// provides recorded data as a string of scanning result
 class QrcodeBarcodeScanner {
+  final _pressedKeys = <LogicalKeyboardKey>{};
+  final _specialKeys = <LogicalKeyboardKey, Map<LogicalKeyboardKey, String>>{};
   final ScannedCallback _onBarcodeScannedCallback;
   final Duration _bufferDuration;
   final bool _useKeyDownEvent;
 
-  final Map<String, Map<String, dynamic>> _keyMappings = {
+  final Map<String, Map<String, String?>> _keyMappings = {
     "a": {"normal": "a", "shift": "A", "altGr": null},
     "b": {"normal": "b", "shift": "B", "altGr": null},
     "c": {"normal": "c", "shift": "C", "altGr": null},
@@ -89,13 +91,11 @@ class QrcodeBarcodeScanner {
     "Numpad .": {"normal": ".", "shift": null, "altGr": null},
   };
 
-
   QrcodeBarcodeScanner({
     bool useKeyDownEvent = true,
     required ScannedCallback onBarcodeScannedCallback,
     Duration bufferDuration = hundredMs,
-  })
-      : _onBarcodeScannedCallback = onBarcodeScannedCallback,
+  })  : _onBarcodeScannedCallback = onBarcodeScannedCallback,
         _bufferDuration = bufferDuration,
         _useKeyDownEvent = useKeyDownEvent {
     final keyboardLocale = ui.window.locale.languageCode;
@@ -109,11 +109,9 @@ class QrcodeBarcodeScanner {
 
   final _controller = StreamController<String?>();
 
-  final _pressedKeys = <LogicalKeyboardKey>{};
-
   void _keyBoardCallback(RawKeyEvent event) {
     final isKeyDown =
-    _useKeyDownEvent ? event is RawKeyDownEvent : event is RawKeyUpEvent;
+        _useKeyDownEvent ? event is RawKeyDownEvent : event is RawKeyUpEvent;
 
     if (isKeyDown) {
       final logicalKey = event.logicalKey;
@@ -148,7 +146,40 @@ class QrcodeBarcodeScanner {
     }
   }
 
-  String _getKeyForLogicalKey(LogicalKeyboardKey key) {
+  int _getKeyForMappedKey(String key, List<String> modifiers) {
+    // Map the key to its standard equivalent
+    String standardKey = "";
+    if (_keyMappings.containsKey(key)) {
+      Map<String, String?> keyMap = _keyMappings[key]!;
+      if (modifiers.contains("shift") && keyMap["shift"] != null) {
+        standardKey = keyMap["shift"]!;
+      } else if (modifiers.contains("altGr") && keyMap["altGr"] != null) {
+        standardKey = keyMap["altGr"]!;
+      } else {
+        standardKey = keyMap["normal"]!;
+      }
+    } else {
+      standardKey = key;
+    }
+
+    // Generate the key code based on the standard key and modifiers
+    int keyCode = standardKey.codeUnitAt(0);
+    if (modifiers.contains("shift")) {
+      keyCode |= ModifierKey.shiftModifier;
+    }
+    if (modifiers.contains("alt")) {
+      keyCode |= ModifierKey.altModifier;
+    }
+    if (modifiers.contains("control")) {
+      keyCode |= ModifierKey.controlModifier;
+    }
+    if (modifiers.contains("meta")) {
+      keyCode |= ModifierKey.metaModifier;
+    }
+    return keyCode;
+  }
+
+  LogicalKeyboardKey _getKeyForLogicalKey(LogicalKeyboardKey key) {
     final modifiers = <String>[];
     if (_pressedKeys.contains(LogicalKeyboardKey.shiftLeft) ||
         _pressedKeys.contains(LogicalKeyboardKey.shiftRight)) {
@@ -163,25 +194,33 @@ class QrcodeBarcodeScanner {
       modifiers.add('ctrl');
     }
 
-    final specialKey = _keyMappings[key];
+    final specialKey = _specialKeys[key];
     if (specialKey != null) {
-      final physicalKey = specialKey.keys.firstWhereOrNull(
+      final physicalKey = specialKey.keys.firstWhere(
             (k) => _pressedKeys.contains(k),
+        orElse: () => null,
       );
       if (physicalKey != null) {
+        final mappedKey = _keyMappings[specialKey[physicalKey]];
+        if (mappedKey != null) {
+          final defaultKey = mappedKey['default'];
+          return LogicalKeyboardKey.findKeyByKeyId(
+              _getKeyForMappedKey(_keyMappings[String.fromCharCodes(keyChars)]?['default'] ?? '', modifiers) as int
+          ) ?? LogicalKeyboardKey(LogicalKeyboardKey.unknown);
+
+        }
         return specialKey[physicalKey]!;
       }
     }
 
     final keyLabel = key.keyLabel;
-    if (keyLabel.isEmpty) {
-      return '';
+    if (keyLabel == null || keyLabel.isEmpty) {
+      return LogicalKeyboardKey.none;
     }
     final keyChars = keyLabel.runes.toList();
-    if (modifiers.isEmpty) {
-      return String.fromCharCodes(keyChars);
-    }
-    final modifierString = modifiers.join('+');
-    return '$modifierString+${String.fromCharCodes(keyChars)}';
+    return LogicalKeyboardKey.findKeyByKeyId(
+        _getKeyForMappedKey(_keyMappings[String.fromCharCodes(keyChars)]?['default'] ?? '', modifiers).toInt()
+    ) ?? LogicalKeyboardKey(LogicalKeyboardKey.unknown);
   }
+
 }
