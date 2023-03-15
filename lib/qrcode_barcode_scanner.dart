@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
 
 typedef ScannedCallback = void Function(String scannedCode);
@@ -19,100 +20,168 @@ class QrcodeBarcodeScanner {
   final Duration _bufferDuration;
   final bool _useKeyDownEvent;
 
+  final Map<String, Map<String, dynamic>> _keyMappings = {
+    "a": {"normal": "a", "shift": "A", "altGr": null},
+    "b": {"normal": "b", "shift": "B", "altGr": null},
+    "c": {"normal": "c", "shift": "C", "altGr": null},
+    "d": {"normal": "d", "shift": "D", "altGr": null},
+    "e": {"normal": "e", "shift": "E", "altGr": null},
+    "f": {"normal": "f", "shift": "F", "altGr": null},
+    "g": {"normal": "g", "shift": "G", "altGr": null},
+    "h": {"normal": "h", "shift": "H", "altGr": null},
+    "i": {"normal": "i", "shift": "I", "altGr": null},
+    "j": {"normal": "j", "shift": "J", "altGr": null},
+    "k": {"normal": "k", "shift": "K", "altGr": null},
+    "l": {"normal": "l", "shift": "L", "altGr": null},
+    "m": {"normal": "m", "shift": "M", "altGr": null},
+    "n": {"normal": "n", "shift": "N", "altGr": null},
+    "o": {"normal": "o", "shift": "O", "altGr": null},
+    "p": {"normal": "p", "shift": "P", "altGr": null},
+    "q": {"normal": "q", "shift": "Q", "altGr": null},
+    "r": {"normal": "r", "shift": "R", "altGr": null},
+    "s": {"normal": "s", "shift": "S", "altGr": null},
+    "t": {"normal": "t", "shift": "T", "altGr": null},
+    "u": {"normal": "u", "shift": "U", "altGr": null},
+    "v": {"normal": "v", "shift": "V", "altGr": null},
+    "w": {"normal": "w", "shift": "W", "altGr": null},
+    "x": {"normal": "x", "shift": "X", "altGr": null},
+    "y": {"normal": "y", "shift": "Y", "altGr": null},
+    "z": {"normal": "z", "shift": "Z", "altGr": null},
+    "1": {"normal": "1", "shift": "!", "altGr": null},
+    "2": {"normal": "2", "shift": "@", "altGr": null},
+    "3": {"normal": "3", "shift": "#", "altGr": null},
+    "4": {"normal": "4", "shift": "\$", "altGr": null},
+    "5": {"normal": "5", "shift": "%", "altGr": null},
+    "6": {"normal": "6", "shift": "^", "altGr": null},
+    "7": {"normal": "7", "shift": "&", "altGr": null},
+    "8": {"normal": "8", "shift": "*", "altGr": null},
+    "9": {"normal": "9", "shift": "(", "altGr": null},
+    "0": {"normal": "0", "shift": ")", "altGr": null},
+    "`": {"normal": "`", "shift": "~", "altGr": null},
+    "-": {"normal": "-", "shift": "_", "altGr": null},
+    "=": {"normal": "=", "shift": "+", "altGr": null},
+    "[": {"normal": "[", "shift": "{", "altGr": null},
+    "]": {"normal": "]", "shift": "}", "altGr": null},
+    "\\": {"normal": "\\", "shift": "|", "altGr": null},
+    ";": {"normal": ";", "shift": ":", "altGr": null},
+    "'": {"normal": "'", "shift": "\"", "altGr": null},
+    ",": {"normal": ",", "shift": "<", "altGr": null},
+    ".": {"normal": ".", "shift": ">", "altGr": null},
+    "/": {"normal": "/", "shift": "?", "altGr": null},
+    " ": {"normal": " ", "shift": null, "altGr": null},
+    "Tab": {"normal": "\t", "shift": null, "altGr": null},
+    "Enter": {"normal": "\n", "shift": null, "altGr": null},
+    "Numpad /": {"normal": "/", "shift": null, "altGr": null},
+    "Numpad *": {"normal": "*", "shift": null, "altGr": null},
+    "Numpad -": {"normal": "-", "shift": null, "altGr": null},
+    "Numpad +": {"normal": "+", "shift": null, "altGr": null},
+    "Numpad Enter": {"normal": "\n", "shift": null, "altGr": null},
+    "Numpad 1": {"normal": "1", "shift": null, "altGr": null},
+    "Numpad 2": {"normal": "2", "shift": null, "altGr": null},
+    "Numpad 3": {"normal": "3", "shift": null, "altGr": null},
+    "Numpad 4": {"normal": "4", "shift": null, "altGr": null},
+    "Numpad 5": {"normal": "5", "shift": null, "altGr": null},
+    "Numpad 6": {"normal": "6", "shift": null, "altGr": null},
+    "Numpad 7": {"normal": "7", "shift": null, "altGr": null},
+    "Numpad 8": {"normal": "8", "shift": null, "altGr": null},
+    "Numpad 9": {"normal": "9", "shift": null, "altGr": null},
+    "Numpad 0": {"normal": "0", "shift": null, "altGr": null},
+    "Numpad .": {"normal": ".", "shift": null, "altGr": null},
+  };
+
+
   QrcodeBarcodeScanner({
-    bool useKeyDownEvent = false,
+    bool useKeyDownEvent = true,
     required ScannedCallback onBarcodeScannedCallback,
     Duration bufferDuration = hundredMs,
-  })  : _onBarcodeScannedCallback = onBarcodeScannedCallback,
+  })
+      : _onBarcodeScannedCallback = onBarcodeScannedCallback,
         _bufferDuration = bufferDuration,
         _useKeyDownEvent = useKeyDownEvent {
     final keyboardLocale = ui.window.locale.languageCode;
     print('Keyboard language: $keyboardLocale');
     RawKeyboard.instance.addListener(_keyBoardCallback);
-    _keyboardSubscription =
-        _controller.stream.where((char) => char != null).listen(onKeyEvent);
+    _controller.stream.where((char) => char != null).listen(onKeyEvent);
   }
 
-  List<String> _scannedChars = [];
+  final List<String> _scannedChars = [];
   DateTime? _lastScannedCharCodeTime;
-  late StreamSubscription<String?> _keyboardSubscription;
 
   final _controller = StreamController<String?>();
 
-  /// Function call on Key press event
-  void onKeyEvent(String? char) {
-    debugPrint(char);
-    //remove any pending characters older than bufferDuration value
-    checkPendingCharCodesToClear();
-    _lastScannedCharCodeTime = DateTime.now();
-    if (char == lineFeed) {
-      _onBarcodeScannedCallback.call(_scannedChars.join());
-      resetScannedCharCodes();
+  final _pressedKeys = <LogicalKeyboardKey>{};
+
+  void _keyBoardCallback(RawKeyEvent event) {
+    final isKeyDown =
+    _useKeyDownEvent ? event is RawKeyDownEvent : event is RawKeyUpEvent;
+
+    if (isKeyDown) {
+      final logicalKey = event.logicalKey;
+      final specialKey = _keyMappings[logicalKey];
+      if (specialKey != null) {
+        _pressedKeys.add(logicalKey);
+      }
+      final key = _getKeyForLogicalKey(logicalKey);
+      print('Pressed key: $key');
+      _controller.add(key);
     } else {
-      //add character to list of scanned characters;
-      _scannedChars.add(char!);
+      _pressedKeys.remove(event.logicalKey);
     }
   }
 
-  /// Check for pending char codes to clear
-  void checkPendingCharCodesToClear() {
-    if (_lastScannedCharCodeTime != null) {
-      if (_lastScannedCharCodeTime!
-          .isBefore(DateTime.now().subtract(_bufferDuration))) {
-        resetScannedCharCodes();
+  void onKeyEvent(String? key) {
+    if (_lastScannedCharCodeTime == null ||
+        DateTime.now().difference(_lastScannedCharCodeTime!) >
+            _bufferDuration) {
+      _scannedChars.clear();
+    }
+    _lastScannedCharCodeTime = DateTime.now();
+    _scannedChars.add(key!);
+    final scannedCode = _scannedChars.join();
+    print('Scanned code: $scannedCode');
+    if (scannedCode.contains(lineFeed)) {
+      final codes = scannedCode.split(lineFeed);
+      final lastCode = codes.removeLast();
+      codes.forEach(_onBarcodeScannedCallback);
+      _onBarcodeScannedCallback(lastCode);
+      _scannedChars.clear();
+    }
+  }
+
+  String _getKeyForLogicalKey(LogicalKeyboardKey key) {
+    final modifiers = <String>[];
+    if (_pressedKeys.contains(LogicalKeyboardKey.shiftLeft) ||
+        _pressedKeys.contains(LogicalKeyboardKey.shiftRight)) {
+      modifiers.add('shift');
+    }
+    if (_pressedKeys.contains(LogicalKeyboardKey.altLeft) ||
+        _pressedKeys.contains(LogicalKeyboardKey.altRight)) {
+      modifiers.add('alt');
+    }
+    if (_pressedKeys.contains(LogicalKeyboardKey.controlLeft) ||
+        _pressedKeys.contains(LogicalKeyboardKey.controlRight)) {
+      modifiers.add('ctrl');
+    }
+
+    final specialKey = _keyMappings[key];
+    if (specialKey != null) {
+      final physicalKey = specialKey.keys.firstWhereOrNull(
+            (k) => _pressedKeys.contains(k),
+      );
+      if (physicalKey != null) {
+        return specialKey[physicalKey]!;
       }
     }
-  }
 
-  /// Reset the scanned char codes
-  void resetScannedCharCodes() {
-    _lastScannedCharCodeTime = null;
-    _scannedChars = [];
-  }
-
-  /// Add scanned char code
-  void addScannedCharCode(String charCode) {
-    _scannedChars.add(charCode);
-  }
-
-  /// Call back of the key board
-  void _keyBoardCallback(RawKeyEvent keyEvent) {
-    if (keyEvent.logicalKey.keyId > 255 &&
-        keyEvent.data.logicalKey != LogicalKeyboardKey.enter) return;
-    if ((!_useKeyDownEvent && keyEvent is RawKeyUpEvent) ||
-        (_useKeyDownEvent && keyEvent is RawKeyDownEvent)) {
-      if (keyEvent.data is RawKeyEventDataAndroid) {
-        _controller.sink.add(String.fromCharCode(
-            ((keyEvent.data) as RawKeyEventDataAndroid).codePoint));
-      } else if (keyEvent.data is RawKeyEventDataFuchsia) {
-        _controller.sink.add(String.fromCharCode(
-            ((keyEvent.data) as RawKeyEventDataFuchsia).codePoint));
-      } else if (keyEvent.data.logicalKey == LogicalKeyboardKey.enter) {
-        _controller.sink.add(lineFeed);
-      } else if (keyEvent.data is RawKeyEventDataWeb) {
-        _controller.sink.add(((keyEvent.data) as RawKeyEventDataWeb).keyLabel);
-      } else if (keyEvent.data is RawKeyEventDataLinux) {
-        _controller.sink
-            .add(((keyEvent.data) as RawKeyEventDataLinux).keyLabel);
-      } else if (keyEvent.data is RawKeyEventDataWindows) {
-        _controller.sink.add(String.fromCharCode(
-            ((keyEvent.data) as RawKeyEventDataWindows).keyCode));
-      } else if (keyEvent.data is RawKeyEventDataMacOs) {
-        _controller.sink
-            .add(((keyEvent.data) as RawKeyEventDataMacOs).characters);
-      } else if (keyEvent.data is RawKeyEventDataIos) {
-        _controller.sink
-            .add(((keyEvent.data) as RawKeyEventDataIos).characters);
-      } else {
-        _controller.sink.add(keyEvent.character);
-      }
+    final keyLabel = key.keyLabel;
+    if (keyLabel.isEmpty) {
+      return '';
     }
-  }
-
-  /// Dispose function
-  void dispose() {
-    _keyboardSubscription.cancel();
-    _controller.close();
-    RawKeyboard.instance.removeListener(_keyBoardCallback);
+    final keyChars = keyLabel.runes.toList();
+    if (modifiers.isEmpty) {
+      return String.fromCharCodes(keyChars);
+    }
+    final modifierString = modifiers.join('+');
+    return '$modifierString+${String.fromCharCodes(keyChars)}';
   }
 }
