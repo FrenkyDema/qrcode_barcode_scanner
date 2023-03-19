@@ -1,4 +1,4 @@
-# flutter_barcode_keyboard_listener
+# qrcode_barcode_scanner
 
 Plugin for managing QR and BAR code reading from an external device.
 
@@ -11,41 +11,40 @@ Plugin for managing QR and BAR code reading from an external device.
 ## Class Name
 
 ```dart
-BarcodeListener
+QrcodeBarcodeScanner
 ```
 
 ## Variables
 
 ```dart
-BarcodeScannedCallback onBarcodeScannedCallback; //<- Function(String barcode)
-Duration bufferDuration;
-bool useKeyDownEvent;
+ScannedCallback onScannedCallback   //void Function(String scannedCode);
+bool useKeyDownEvent                //Optional
 ```
 
 ## Example
 
 ```dart
+String? _scanValue;
+
 @override
-void initState() {
-  BarcodeListener(
-    onBarcodeScannedCallback:
-        (String value) =>
-        setState(() {
-          print(value);
+  void initState() {
+    super.initState();
+    QrcodeBarcodeScanner(
+      onScannedCallback: (String value) => setState(
+        () {
+          _scanValue = value;
         },
-        ),
-  );
-}
+      ),
+    );
+  }
 ```
 
 ## Installation
 
 ```bash
-flutter pub add flutter_barcode_keyboard_listener
+flutter pub add qrcode_barcode_scanner
 ```
 
 ## Tested Devices
 
-```bash
-Sunmi Blink
-```
+- Sunmi Blink

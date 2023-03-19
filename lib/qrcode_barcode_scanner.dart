@@ -19,10 +19,10 @@ const Duration hundredMs = Duration(milliseconds: 100);
 /// a [DelayedActionHandler] to handle delayed events.
 class QrcodeBarcodeScanner {
   /// The callback function to handle scanned barcodes.
-  final ScannedCallback onBarcodeScannedCallback;
+  final ScannedCallback onScannedCallback;
 
   /// A list of pressed keys.
-  final List<String> pressedKeys = [];
+  final List<String> _pressedKeys = [];
 
   /// A stream controller to listen to keyboard events.
   final StreamController<String?> _controller = StreamController<String?>();
@@ -31,7 +31,7 @@ class QrcodeBarcodeScanner {
   final DelayedActionHandler _actionHandler;
 
   /// A map that maps key labels to their corresponding normal and shift values.
-  final Map<String, Map<String, String?>> keyMappings = {
+  final Map<String, Map<String, String?>> _keyMappings = {
     "a": {"normal": "a", "shift": "A"},
     "b": {"normal": "b", "shift": "B"},
     "c": {"normal": "c", "shift": "C"},
@@ -100,34 +100,33 @@ class QrcodeBarcodeScanner {
 
   /// Creates a new instance of [QrcodeBarcodeScanner].
   ///
-  /// The [onBarcodeScannedCallback] parameter is a required callback function
+  /// The [onScannedCallback] parameter is a required callback function
   /// that handles scanned barcodes. The [useKeyDownEvent] parameter is an optional
   /// boolean value that determines if the scanner should listen to key down events.
   QrcodeBarcodeScanner({
-    required this.onBarcodeScannedCallback,
+    required this.onScannedCallback,
     bool useKeyDownEvent = true,
   }) : _actionHandler = DelayedActionHandler(hundredMs) {
     RawKeyboard.instance.addListener(_keyBoardCallback);
     _controller.stream.where((char) => char != null).listen(onKeyEvent);
   }
 
-  /// Handles a keyboard event by adding the read character to the [pressedKeys] list.
+  /// Handles a keyboard event by adding the read character to the [_pressedKeys] list.
   ///
   /// [readChar] is the character read from the keyboard. If [readChar] is not null, it is added to the
-  /// [pressedKeys] list. If [pressedKeys] is not empty, it is joined together to form a string [scannedCode].
-  /// The [scannedCode] is passed to the [onBarcodeScannedCallback] function and the [pressedKeys] list is cleared.
+  /// [_pressedKeys] list. If [_pressedKeys] is not empty, it is joined together to form a string [scannedCode].
+  /// The [scannedCode] is passed to the [onScannedCallback] function and the [_pressedKeys] list is cleared.
   void onKeyEvent(String? readChar) {
     if (readChar != null) {
-      pressedKeys.add(readChar);
+      _pressedKeys.add(readChar);
       _actionHandler.executeDelayed(() {
         final String scannedCode =
-        pressedKeys.isNotEmpty ? pressedKeys.join() : "";
-        onBarcodeScannedCallback(scannedCode);
-        pressedKeys.clear();
+            _pressedKeys.isNotEmpty ? _pressedKeys.join() : "";
+        onScannedCallback(scannedCode);
+        _pressedKeys.clear();
       });
     }
   }
-
 
   /// The callback function that is called when a keyboard event occurs.
   ///
@@ -153,10 +152,9 @@ class QrcodeBarcodeScanner {
     }
   }
 
-
   /// Returns the mapped key based on the given logical keyboard key [key].
   ///
-  /// The mapped key is obtained from the [keyMappings] map. The key mappings map
+  /// The mapped key is obtained from the [_keyMappings] map. The key mappings map
   /// maps each key label to a map that maps each modifier (e.g. "normal",
   /// "shift") to a corresponding value. If the key label is not found in the
   /// map, null is returned.
@@ -164,7 +162,7 @@ class QrcodeBarcodeScanner {
   /// [key] is the logical keyboard key.
   String? _getKeyForLogicalKey(LogicalKeyboardKey key) {
     final Map<String, String?>? mappedKey =
-        keyMappings[key.keyLabel.toLowerCase()];
+        _keyMappings[key.keyLabel.toLowerCase()];
 
     return mappedKey?[_modifier];
   }
