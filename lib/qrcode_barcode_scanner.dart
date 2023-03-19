@@ -4,15 +4,33 @@ import 'package:flutter/services.dart';
 
 import 'delayed_action_handler.dart';
 
+/// A callback function type to handle scanned barcodes.
+///
+/// [scannedCode] is the string representing the scanned barcode.
 typedef ScannedCallback = void Function(String scannedCode);
 
+/// Duration of 100 milliseconds.
 const Duration hundredMs = Duration(milliseconds: 100);
 
+/// A class that handles scanning of QR codes and barcodes.
+///
+/// The [QrcodeBarcodeScanner] class listens to keyboard events to scan QR codes
+/// and barcodes. It uses a [StreamController] to listen to keyboard events and
+/// a [DelayedActionHandler] to handle delayed events.
 class QrcodeBarcodeScanner {
+  /// The callback function to handle scanned barcodes.
   final ScannedCallback onBarcodeScannedCallback;
+
+  /// A list of pressed keys.
   final List<String> pressedKeys = [];
+
+  /// A stream controller to listen to keyboard events.
   final StreamController<String?> _controller = StreamController<String?>();
+
+  /// A delayed action handler to handle delayed events.
   final DelayedActionHandler _actionHandler;
+
+  /// A map that maps key labels to their corresponding normal and shift values.
   final Map<String, Map<String, String?>> keyMappings = {
     "a": {"normal": "a", "shift": "A"},
     "b": {"normal": "b", "shift": "B"},
@@ -65,13 +83,26 @@ class QrcodeBarcodeScanner {
     "Enter": {"normal": "\n", "shift": null},
   };
 
-  isShift(LogicalKeyboardKey key) => key.synonyms.isNotEmpty
+  /// Returns `true` if the [LogicalKeyboardKey] is the shift key.
+  ///
+  /// [key] is the logical keyboard key to check.
+  bool isShift(LogicalKeyboardKey key) => key.synonyms.isNotEmpty
       ? key.synonyms.first == LogicalKeyboardKey.shift
       : false;
 
-  isKeyDown(RawKeyEvent event) => event is RawKeyDownEvent;
+  /// Returns `true` if the [RawKeyEvent] is a key down event.
+  ///
+  /// [event] is the raw keyboard event to check.
+  bool isKeyDown(RawKeyEvent event) => event is RawKeyDownEvent;
 
+  /// The current modifier for the shift key.
   String _modifier = "normal";
+
+  /// Creates a new instance of [QrcodeBarcodeScanner].
+  ///
+  /// The [onBarcodeScannedCallback] parameter is a required callback function
+  /// that handles scanned barcodes. The [useKeyDownEvent] parameter is an optional
+  /// boolean value that determines if the scanner should listen to key down events.
   QrcodeBarcodeScanner({
     required this.onBarcodeScannedCallback,
     bool useKeyDownEvent = true,
@@ -80,18 +111,32 @@ class QrcodeBarcodeScanner {
     _controller.stream.where((char) => char != null).listen(onKeyEvent);
   }
 
+  /// Handles a keyboard event by adding the read character to the [pressedKeys] list.
+  ///
+  /// [readChar] is the character read from the keyboard. If [readChar] is not null, it is added to the
+  /// [pressedKeys] list. If [pressedKeys] is not empty, it is joined together to form a string [scannedCode].
+  /// The [scannedCode] is passed to the [onBarcodeScannedCallback] function and the [pressedKeys] list is cleared.
   void onKeyEvent(String? readChar) {
     if (readChar != null) {
       pressedKeys.add(readChar);
       _actionHandler.executeDelayed(() {
         final String scannedCode =
-            pressedKeys.isNotEmpty ? pressedKeys.join() : "";
+        pressedKeys.isNotEmpty ? pressedKeys.join() : "";
         onBarcodeScannedCallback(scannedCode);
         pressedKeys.clear();
       });
     }
   }
 
+
+  /// The callback function that is called when a keyboard event occurs.
+  ///
+  /// If [event] is a key down event, the corresponding key label is retrieved and added to the stream controller
+  /// using [_getKeyForLogicalKey]. If the key is a shift key, [_modifier] is set to "shift" for the next key event.
+  ///
+  /// If [event] is a key up event, and the key is a shift key, [_modifier] is set to "normal".
+  ///
+  /// [event] is the raw keyboard event that occurred.
   void _keyBoardCallback(RawKeyEvent event) {
     final LogicalKeyboardKey logicalKey = event.logicalKey;
     if (isKeyDown(event)) {
@@ -108,6 +153,15 @@ class QrcodeBarcodeScanner {
     }
   }
 
+
+  /// Returns the mapped key based on the given logical keyboard key [key].
+  ///
+  /// The mapped key is obtained from the [keyMappings] map. The key mappings map
+  /// maps each key label to a map that maps each modifier (e.g. "normal",
+  /// "shift") to a corresponding value. If the key label is not found in the
+  /// map, null is returned.
+  ///
+  /// [key] is the logical keyboard key.
   String? _getKeyForLogicalKey(LogicalKeyboardKey key) {
     final Map<String, String?>? mappedKey =
         keyMappings[key.keyLabel.toLowerCase()];
@@ -115,6 +169,10 @@ class QrcodeBarcodeScanner {
     return mappedKey?[_modifier];
   }
 
+  /// Disposes the resources used by the `QrcodeBarcodeScanner`.
+  ///
+  /// Call this method when the `QrcodeBarcodeScanner` is no longer needed to release
+  /// any resources (such as keyboard listeners) it may have acquired.
   void dispose() {
     RawKeyboard.instance.removeListener(_keyBoardCallback);
     _controller.close();
