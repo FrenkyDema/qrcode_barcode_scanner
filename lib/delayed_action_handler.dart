@@ -1,15 +1,26 @@
 import 'dart:async';
 
-class DelayedActionHandler<T> {
+class DelayedActionHandler {
   final Duration delay;
-  void Function(T) action;
-  Timer timer;
+  Timer? _timer;
+  Function()? _action;
 
-  DelayedActionHandler(this.delay, this.action)
-      : timer = Timer(Duration.zero, () {});
+  DelayedActionHandler(this.delay);
 
-  void call(T value) {
-    timer.cancel();
-    timer = Timer(delay, () => action(value));
+  void executeDelayed(Function() action) {
+    cancelDelayed();
+    _action = action;
+    _timer = Timer(delay, _performAction);
+  }
+
+  void cancelDelayed() {
+    _timer?.cancel();
+    _timer = null;
+    _action = null;
+  }
+
+  void _performAction() {
+    _action?.call();
+    _action = null;
   }
 }

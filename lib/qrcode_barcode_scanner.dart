@@ -1,20 +1,18 @@
 import 'dart:async';
-import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 import 'delayed_action_handler.dart';
 
 typedef ScannedCallback = void Function(String scannedCode);
 
-const Duration aSecond = Duration(seconds: 1);
 const Duration hundredMs = Duration(milliseconds: 100);
-const String lineFeed = '\n';
 
 class QrcodeBarcodeScanner {
   final ScannedCallback onBarcodeScannedCallback;
   final List<String> pressedKeys = [];
+  final StreamController<String?> _controller = StreamController<String?>();
+  final DelayedActionHandler _actionHandler;
   final Map<String, Map<String, String?>> keyMappings = {
     "a": {"normal": "a", "shift": "A"},
     "b": {"normal": "b", "shift": "B"},
@@ -65,9 +63,7 @@ class QrcodeBarcodeScanner {
     "/": {"normal": "/", "shift": "?"},
     "Tab": {"normal": "\t", "shift": null},
     "Enter": {"normal": "\n", "shift": null},
-    "Numpad Enter": {"normal": "\n", "shift": null},
   };
-  final StreamController<String?> _controller = StreamController<String?>();
 
   isShift(LogicalKeyboardKey key) => key.synonyms.isNotEmpty
       ? key.synonyms.first == LogicalKeyboardKey.shift
@@ -75,24 +71,24 @@ class QrcodeBarcodeScanner {
 
   isKeyDown(RawKeyEvent event) => event is RawKeyDownEvent;
 
-  // Lista dei modificatori attivi
   String _modifier = "normal";
-
   QrcodeBarcodeScanner({
     required this.onBarcodeScannedCallback,
     bool useKeyDownEvent = true,
-    Duration bufferDuration = const Duration(milliseconds: 100),
-  }) {
-    final keyboardLocale = ui.window.locale.languageCode;
-    debugPrint('Keyboard language: $keyboardLocale');
+  }) : _actionHandler = DelayedActionHandler(hundredMs) {
     RawKeyboard.instance.addListener(_keyBoardCallback);
     _controller.stream.where((char) => char != null).listen(onKeyEvent);
   }
 
   void onKeyEvent(String? readChar) {
     if (readChar != null) {
-      print('readChar: $readChar');
       pressedKeys.add(readChar);
+      _actionHandler.executeDelayed(() {
+        final String scannedCode =
+            pressedKeys.isNotEmpty ? pressedKeys.join() : "";
+        onBarcodeScannedCallback(scannedCode);
+        pressedKeys.clear();
+      });
     }
   }
 
@@ -113,7 +109,6 @@ class QrcodeBarcodeScanner {
   }
 
   String? _getKeyForLogicalKey(LogicalKeyboardKey key) {
-    // Ottiene la mappatura dei tasti speciali per il tasto Shift premuto
     final Map<String, String?>? mappedKey =
         keyMappings[key.keyLabel.toLowerCase()];
 
