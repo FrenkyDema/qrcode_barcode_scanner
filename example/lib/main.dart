@@ -19,8 +19,8 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     QrcodeBarcodeScanner(
-      onBarcodeScannedCallback: (String value) => setState(
-            () {
+      onScannedCallback: (String value) => setState(
+        () {
           _scanValue = value;
         },
       ),

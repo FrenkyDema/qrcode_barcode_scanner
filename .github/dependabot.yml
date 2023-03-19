@@ -1,21 +1,17 @@
 version: 2
 updates:
-  - package-ecosystem: "flutter"
+  - package-ecosystem: "pub"
     directory: "/"
     schedule:
       interval: "daily"
-    allow:
-      - dependency-type: "direct"
-        update-type: "semver:non-breaking"
-        labels:
-          - "dependencies"
+    open-pull-requests-limit: 99
+    labels:
+      - "dependencies"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "daily"
-    allow:
-      - dependency-type: "direct"
-        update-type: "semver:non-breaking"
-        labels:
-          - "dependencies"
+    open-pull-requests-limit: 99
+    labels:
+      - "dependencies"
