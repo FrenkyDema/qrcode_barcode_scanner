@@ -18,7 +18,6 @@ QrcodeBarcodeScanner
 
 ```dart
 ScannedCallback onScannedCallback   //void Function(String scannedCode);
-bool useKeyDownEvent                //Optional
 ```
 
 ## Example

@@ -101,11 +101,9 @@ class QrcodeBarcodeScanner {
   /// Creates a new instance of [QrcodeBarcodeScanner].
   ///
   /// The [onScannedCallback] parameter is a required callback function
-  /// that handles scanned barcodes. The [useKeyDownEvent] parameter is an optional
-  /// boolean value that determines if the scanner should listen to key down events.
+  /// that handles scanned barcodes.
   QrcodeBarcodeScanner({
-    required this.onScannedCallback,
-    bool useKeyDownEvent = true,
+    required this.onScannedCallback
   }) : _actionHandler = DelayedActionHandler(hundredMs) {
     RawKeyboard.instance.addListener(_keyBoardCallback);
     _controller.stream.where((char) => char != null).listen(onKeyEvent);
