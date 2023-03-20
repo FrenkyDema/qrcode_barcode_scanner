@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.0.0
+
+Renomination of the repository and refactoring
+
 ## 0.1.0
 
 Refactoring, add better documentation
