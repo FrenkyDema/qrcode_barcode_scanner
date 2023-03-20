@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.0.1
+
+Update License
+
 ## 1.0.0
 
 Renomination of the repository and refactoring
