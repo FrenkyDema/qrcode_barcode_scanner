@@ -141,4 +141,4 @@ fabric.properties
 .dart_tool/
 .pubignore
 local.properties
-.idea/inspectionProfiles/Project_Default.xml
+.idea/
