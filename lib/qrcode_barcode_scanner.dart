@@ -81,6 +81,7 @@ class QrcodeBarcodeScanner {
     "/": {"normal": "/", "shift": "?"},
     "Tab": {"normal": "\t", "shift": null},
     "Enter": {"normal": "\n", "shift": null},
+    " ": {"normal": " ", "shift": " "},
   };
 
   /// Returns `true` if the [LogicalKeyboardKey] is the shift key.
@@ -102,9 +103,8 @@ class QrcodeBarcodeScanner {
   ///
   /// The [onScannedCallback] parameter is a required callback function
   /// that handles scanned barcodes.
-  QrcodeBarcodeScanner({
-    required this.onScannedCallback
-  }) : _actionHandler = DelayedActionHandler(hundredMs) {
+  QrcodeBarcodeScanner({required this.onScannedCallback})
+      : _actionHandler = DelayedActionHandler(hundredMs) {
     RawKeyboard.instance.addListener(_keyBoardCallback);
     _controller.stream.where((char) => char != null).listen(onKeyEvent);
   }
@@ -136,15 +136,12 @@ class QrcodeBarcodeScanner {
   /// [event] is the raw keyboard event that occurred.
   void _keyBoardCallback(RawKeyEvent event) {
     final LogicalKeyboardKey logicalKey = event.logicalKey;
-    if (isKeyDown(event)) {
+    if (!isKeyDown(event)) {
       if (isShift(logicalKey)) {
         _modifier = "shift";
       } else {
         final String? key = _getKeyForLogicalKey(logicalKey);
         _controller.add(key);
-      }
-    } else {
-      if (isShift(logicalKey)) {
         _modifier = "normal";
       }
     }
@@ -161,7 +158,6 @@ class QrcodeBarcodeScanner {
   String? _getKeyForLogicalKey(LogicalKeyboardKey key) {
     final Map<String, String?>? mappedKey =
         _keyMappings[key.keyLabel.toLowerCase()];
-
     return mappedKey?[_modifier];
   }
 
