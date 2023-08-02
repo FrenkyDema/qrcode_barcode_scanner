@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.1.0
+
+Bugfix
+
 ## 1.0.1
 
 Update License

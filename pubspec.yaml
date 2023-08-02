@@ -1,6 +1,6 @@
 name: qrcode_barcode_scanner
 description: Plugins to manage the reading of QR code or barcode from an external device as a keyboard.
-version: 1.0.1
+version: 1.1.0
 repository: "https://github.com/FrenkyDema/qrcode_barcode_scanner"
 
 environment:
@@ -10,14 +10,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  plugin_platform_interface: ^2.1.4
+  plugin_platform_interface: ^2.1.5
   flutter_localizations:
     sdk: flutter
-  flutter_keyboard_visibility: ^5.4.0
+  flutter_keyboard_visibility: ^5.4.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.1
+  flutter_lints: ^2.0.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
