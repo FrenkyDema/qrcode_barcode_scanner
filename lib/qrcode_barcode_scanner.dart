@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'package:qrcode_barcode_scanner/qrcode_barcode_scanner_platform_interface.dart';
 
 import 'delayed_action_handler.dart';
 
@@ -83,6 +84,10 @@ class QrcodeBarcodeScanner {
     "Enter": {"normal": "\n", "shift": null},
     " ": {"normal": " ", "shift": " "},
   };
+
+  Future<String?> getPlatformVersion() {
+    return QrcodeBarcodeScannerPlatform.instance.getPlatformVersion();
+  }
 
   /// Returns `true` if the [LogicalKeyboardKey] is the shift key.
   ///

@@ -3,19 +3,25 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:qrcode_barcode_scanner/qrcode_barcode_scanner_method_channel.dart';
 
 void main() {
-  MethodChannelQrcodeBarcodeScanner platform = MethodChannelQrcodeBarcodeScanner();
+  MethodChannelQrcodeBarcodeScanner platform =
+      MethodChannelQrcodeBarcodeScanner();
   const MethodChannel channel = MethodChannel('qrcode_barcode_scanner');
 
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() {
-    channel.setMockMethodCallHandler((MethodCall methodCall) async {
-      return '42';
-    });
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      channel,
+      (MethodCall methodCall) async {
+        return '42';
+      },
+    );
   });
 
   tearDown(() {
-    channel.setMockMethodCallHandler(null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, null);
   });
 
   test('getPlatformVersion', () async {
