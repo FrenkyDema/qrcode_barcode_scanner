@@ -23,9 +23,6 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdk 32
-    dependencies {
-        implementation 'androidx.annotation:annotation:1.6.0'
-    }
     namespace "com.example.qrcode_barcode_scanner"
 
     compileOptions {
