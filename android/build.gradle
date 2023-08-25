@@ -22,7 +22,7 @@ rootProject.allprojects {
 apply plugin: 'com.android.library'
 
 android {
-    compileSdk 33
+    compileSdk 32
     dependencies {
         implementation 'androidx.annotation:annotation:1.6.0'
     }
@@ -34,7 +34,7 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 31
+        minSdkVersion 24
     }
     buildToolsVersion '30.0.3'
 }
