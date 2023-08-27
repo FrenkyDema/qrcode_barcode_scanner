@@ -8,7 +8,8 @@ abstract class QrcodeBarcodeScannerPlatform extends PlatformInterface {
 
   static final Object _token = Object();
 
-  static QrcodeBarcodeScannerPlatform _instance = MethodChannelQrcodeBarcodeScanner();
+  static QrcodeBarcodeScannerPlatform _instance =
+      MethodChannelQrcodeBarcodeScanner();
 
   /// The default instance of [QrcodeBarcodeScannerPlatform] to use.
   ///
