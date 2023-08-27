@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.0.0
+
+Rewrite project
+
 ## 1.1.0
 
 Bugfix

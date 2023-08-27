@@ -17,7 +17,7 @@ QrcodeBarcodeScanner
 ## Variables
 
 ```dart
-ScannedCallback onScannedCallback   //void Function(String scannedCode);
+ScannedCallback onScannedCallback;   //void Function(String scannedCode);
 ```
 
 ## Example
