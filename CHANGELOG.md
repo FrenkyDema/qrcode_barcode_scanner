@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.0.1
+
+dart format
+
 ## 2.0.0
 
 Rewrite project
