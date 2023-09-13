@@ -35,7 +35,10 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: Text('Scan value: ${_scanValue ?? "none"}'),
+          child: Text(
+            'Scan value: ${_scanValue ?? "none"}',
+            style: const TextStyle(fontSize: 30),
+          ),
         ),
       ),
     );
