@@ -24,16 +24,15 @@ if (flutterVersionName == null) {
 
 android {
     namespace "com.example.qrcode_barcode_scanner_example"
-    compileSdkVersion flutter.compileSdkVersion
-    ndkVersion flutter.ndkVersion
+    compileSdk 34
+    ndkVersion '26.2.11394342'
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     defaultConfig {
-        manifestPlaceholders = [applicationName: "android.app.Application"]
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.example.qrcode_barcode_scanner_example"
         // You can update the following values to match your application needs.

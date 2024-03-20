@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:qrcode_barcode_scanner/qrcode_barcode_scanner.dart';
-import 'package:qrcode_barcode_scanner/qrcode_barcode_scanner_method_channel.dart';
 import 'package:qrcode_barcode_scanner/qrcode_barcode_scanner_platform_interface.dart';
+import 'package:qrcode_barcode_scanner/qrcode_barcode_scanner_method_channel.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 class MockQrcodeBarcodeScannerPlatform
     with MockPlatformInterfaceMixin
@@ -20,12 +20,12 @@ void main() {
   });
 
   test('getPlatformVersion', () async {
-    QrcodeBarcodeScanner testProjectPlugin =
+    QrcodeBarcodeScanner qrcodeBarcodeScannerPlugin =
         QrcodeBarcodeScanner(onScannedCallback: (String scannedCode) {});
     MockQrcodeBarcodeScannerPlatform fakePlatform =
         MockQrcodeBarcodeScannerPlatform();
     QrcodeBarcodeScannerPlatform.instance = fakePlatform;
 
-    expect(await testProjectPlugin.getPlatformVersion(), '42');
+    expect(await qrcodeBarcodeScannerPlugin.getPlatformVersion(), '42');
   });
 }
