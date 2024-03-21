@@ -5,11 +5,13 @@ import 'package:qrcode_barcode_scanner/qrcode_barcode_scanner_method_channel.dar
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  MethodChannelQrcodeBarcodeScanner platform = MethodChannelQrcodeBarcodeScanner();
+  MethodChannelQrcodeBarcodeScanner platform =
+      MethodChannelQrcodeBarcodeScanner();
   const MethodChannel channel = MethodChannel('qrcode_barcode_scanner');
 
   setUp(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
       channel,
       (MethodCall methodCall) async {
         return '42';
@@ -18,7 +20,8 @@ void main() {
   });
 
   tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(channel, null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, null);
   });
 
   test('getPlatformVersion', () async {

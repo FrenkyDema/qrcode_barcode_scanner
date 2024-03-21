@@ -56,7 +56,7 @@ class QrcodeBarcodeScanner {
       _actionHandler.executeDelayed(() {
         final String scannedCode =
             _pressedKeys.isNotEmpty ? _pressedKeys.join() : "";
-        onScannedCallback(scannedCode);
+        onScannedCallback(scannedCode.trim());
         _pressedKeys.clear();
       });
     }
@@ -71,7 +71,7 @@ class QrcodeBarcodeScanner {
         (List.of(event.character?.codeUnits ?? [])
               ..removeWhere((element) => element == 0))
             .isNotEmpty) {
-      _controller.add(event.character?.trim() ?? "");
+      _controller.add(event.character ?? "");
       return true;
     }
     return false;

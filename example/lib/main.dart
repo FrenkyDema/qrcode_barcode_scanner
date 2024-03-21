@@ -16,7 +16,6 @@ class _MyAppState extends State<MyApp> {
   String? _scanValue;
 
   void setScannedValue(String value) {
-    debugPrint("$value ${value.length}");
     setState(() {
       _scanValue = value;
     });
@@ -27,7 +26,6 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     QrcodeBarcodeScanner(
       onScannedCallback: (String value) {
-        // debugPrint("Scan value vase64: '${utf8.decode(base64.decode(value))}'");
         setScannedValue(value);
       },
     );
@@ -45,7 +43,7 @@ class _MyAppState extends State<MyApp> {
             Expanded(
               child: Center(
                 child: Text(
-                  _scanValue ?? 'none',
+                  "Scan value: ${_scanValue ?? 'none'}",
                   style: const TextStyle(fontSize: 30),
                 ),
               ),
