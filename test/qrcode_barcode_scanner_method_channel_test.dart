@@ -3,11 +3,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:qrcode_barcode_scanner/qrcode_barcode_scanner_method_channel.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   MethodChannelQrcodeBarcodeScanner platform =
       MethodChannelQrcodeBarcodeScanner();
   const MethodChannel channel = MethodChannel('qrcode_barcode_scanner');
-
-  TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger

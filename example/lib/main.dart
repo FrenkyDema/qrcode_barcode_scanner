@@ -15,15 +15,19 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   String? _scanValue;
 
+  void setScannedValue(String value) {
+    setState(() {
+      _scanValue = value;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     QrcodeBarcodeScanner(
-      onScannedCallback: (String value) => setState(
-        () {
-          _scanValue = value;
-        },
-      ),
+      onScannedCallback: (String value) {
+        setScannedValue(value);
+      },
     );
   }
 
@@ -34,11 +38,25 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Plugin example app'),
         ),
-        body: Center(
-          child: Text(
-            'Scan value: ${_scanValue ?? "none"}',
-            style: const TextStyle(fontSize: 30),
-          ),
+        body: Column(
+          children: [
+            Expanded(
+              child: Center(
+                child: Text(
+                  "Scan value: ${_scanValue ?? 'none'}",
+                  style: const TextStyle(fontSize: 30),
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _scanValue = null;
+                });
+              },
+              child: const Text("Clear scanned"),
+            )
+          ],
         ),
       ),
     );

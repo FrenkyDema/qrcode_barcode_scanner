@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 3.0.1
+
+Fix handle space in scanned value
+dart format
+
+## 3.0.0
+
+Update gradle infrastructure
+Update Scanning method
+Refactoring
+
 ## 2.0.1
 
 dart format
