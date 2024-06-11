@@ -42,9 +42,17 @@ class _MyAppState extends State<MyApp> {
           children: [
             Expanded(
               child: Center(
-                child: Text(
-                  "Scan value: ${_scanValue ?? 'none'}",
-                  style: const TextStyle(fontSize: 30),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "Scan value: ${_scanValue ?? 'none'}",
+                      style: const TextStyle(fontSize: 30),
+                    ),
+                    TextFormField(
+                      keyboardType: TextInputType.text,
+                    ),
+                  ],
                 ),
               ),
             ),
