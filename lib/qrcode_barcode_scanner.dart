@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qrcode_barcode_scanner/qrcode_barcode_scanner_platform_interface.dart';
 
@@ -10,10 +10,10 @@ import 'delayed_action_handler.dart';
 /// [scannedCode] is the string representing the scanned barcode.
 typedef ScannedCallback = void Function(String scannedCode);
 
-/// Duration of 100 milliseconds.
+/// Duration representing 100 milliseconds.
 const Duration hundredMs = Duration(milliseconds: 100);
 
-/// A class that handles scanning of QR codes and barcodes.
+/// A class responsible for scanning QR codes and barcodes.
 ///
 /// The [QrcodeBarcodeScanner] class listens to keyboard events to scan QR codes
 /// and barcodes. It uses a [StreamController] to listen to keyboard events and
@@ -41,7 +41,10 @@ class QrcodeBarcodeScanner {
   /// that handles scanned barcodes.
   QrcodeBarcodeScanner({required this.onScannedCallback})
       : _actionHandler = DelayedActionHandler(hundredMs) {
+    // Add keyboard listener
     HardwareKeyboard.instance.addHandler(_keyBoardCallback);
+
+    // Listen to keyboard events
     _controller.stream.where((char) => char != null).listen(onKeyEvent);
   }
 
@@ -55,7 +58,7 @@ class QrcodeBarcodeScanner {
       _pressedKeys.add(readChar);
       _actionHandler.executeDelayed(() {
         final String scannedCode =
-            _pressedKeys.isNotEmpty ? _pressedKeys.join() : "";
+        _pressedKeys.isNotEmpty ? _pressedKeys.join() : "";
         onScannedCallback(scannedCode.trim());
         _pressedKeys.clear();
       });
@@ -66,13 +69,29 @@ class QrcodeBarcodeScanner {
   ///
   /// [event] is the raw keyboard event that occurred.
   bool _keyBoardCallback(KeyEvent event) {
-    if (event.character != "" &&
-        event.character != null &&
-        (List.of(event.character?.codeUnits ?? [])
-              ..removeWhere((element) => element == 0))
-            .isNotEmpty) {
-      _controller.add(event.character ?? "");
+    if (_isTextInputFocused()) {
+      return false; // Bypass scanner logic
+    }
+
+    // Check if the event contains a character and add it to the controller
+    if (event.character != null &&
+        event.character!.isNotEmpty &&
+        event.character!.codeUnits.any((unit) => unit != 0)) {
+      _controller.add(event.character);
       return true;
+    }
+
+    return false;
+  }
+
+  /// Checks if a text input field is focused.
+  bool _isTextInputFocused() {
+    final focus = FocusManager.instance.primaryFocus;
+    if (focus != null && focus.context != null) {
+      final context = focus.context!;
+      return context.findAncestorWidgetOfExactType<EditableText>() != null ||
+          context.findAncestorWidgetOfExactType<TextField>() != null ||
+          context.findAncestorWidgetOfExactType<TextFormField>() != null;
     }
     return false;
   }
@@ -82,7 +101,9 @@ class QrcodeBarcodeScanner {
   /// Call this method when the `QrcodeBarcodeScanner` is no longer needed to release
   /// any resources (such as keyboard listeners) it may have acquired.
   void dispose() {
+    // Remove keyboard listener
     HardwareKeyboard.instance.removeHandler(_keyBoardCallback);
+    // Close stream controller
     _controller.close();
   }
 }
