@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 3.0.2
+
+Fix focus loss when text field is present
+dart format
+
 ## 3.0.1
 
 Fix handle space in scanned value

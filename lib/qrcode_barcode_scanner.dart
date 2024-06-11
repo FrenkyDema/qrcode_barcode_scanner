@@ -58,7 +58,7 @@ class QrcodeBarcodeScanner {
       _pressedKeys.add(readChar);
       _actionHandler.executeDelayed(() {
         final String scannedCode =
-        _pressedKeys.isNotEmpty ? _pressedKeys.join() : "";
+            _pressedKeys.isNotEmpty ? _pressedKeys.join() : "";
         onScannedCallback(scannedCode.trim());
         _pressedKeys.clear();
       });
