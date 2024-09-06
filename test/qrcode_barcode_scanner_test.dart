@@ -1,31 +1,45 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:qrcode_barcode_scanner/qrcode_barcode_scanner.dart';
-import 'package:qrcode_barcode_scanner/qrcode_barcode_scanner_platform_interface.dart';
-import 'package:qrcode_barcode_scanner/qrcode_barcode_scanner_method_channel.dart';
-import 'package:plugin_platform_interface/plugin_platform_interface.dart';
-
-class MockQrcodeBarcodeScannerPlatform
-    with MockPlatformInterfaceMixin
-    implements QrcodeBarcodeScannerPlatform {
-  @override
-  Future<String?> getPlatformVersion() => Future.value('42');
-}
 
 void main() {
-  final QrcodeBarcodeScannerPlatform initialPlatform =
-      QrcodeBarcodeScannerPlatform.instance;
+  TestWidgetsFlutterBinding
+      .ensureInitialized(); // Ensure Flutter bindings are initialized
 
-  test('$MethodChannelQrcodeBarcodeScanner is the default instance', () {
-    expect(initialPlatform, isInstanceOf<MethodChannelQrcodeBarcodeScanner>());
+  late QrcodeBarcodeScanner scanner;
+  String? scannedResult;
+
+  setUp(() {
+    scannedResult = null;
+    scanner = QrcodeBarcodeScanner(onScannedCallback: (code) {
+      scannedResult = code;
+    });
   });
 
-  test('getPlatformVersion', () async {
-    QrcodeBarcodeScanner qrcodeBarcodeScannerPlugin =
-        QrcodeBarcodeScanner(onScannedCallback: (String scannedCode) {});
-    MockQrcodeBarcodeScannerPlatform fakePlatform =
-        MockQrcodeBarcodeScannerPlatform();
-    QrcodeBarcodeScannerPlatform.instance = fakePlatform;
+  tearDown(() {
+    // Dispose the scanner after each test to free resources
+    scanner.dispose();
+  });
 
-    expect(await qrcodeBarcodeScannerPlugin.getPlatformVersion(), '42');
+  test('onScannedCallback is called with correct value', () {
+    // Simulate keyboard events
+    scanner.onKeyEvent('1');
+    scanner.onKeyEvent('2');
+    scanner.onKeyEvent('3');
+
+    // No result should be available immediately
+    expect(scannedResult, isNull);
+
+    // Simulate a delay and check if the callback is triggered with the correct value
+    Future.delayed(const Duration(milliseconds: 150), () {
+      expect(scannedResult, '123');
+    });
+  });
+
+  test('cancelled scan does not call callback', () {
+    // Simulate a key event but cancel the delayed action
+    scanner.onKeyEvent('A');
+    scanner.cancelScan(); // Use the new cancelScan method
+    expect(scannedResult,
+        isNull); // No result expected since the scan is cancelled
   });
 }

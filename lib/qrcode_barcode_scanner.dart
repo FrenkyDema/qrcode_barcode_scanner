@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qrcode_barcode_scanner/qrcode_barcode_scanner_platform_interface.dart';
@@ -31,10 +32,6 @@ class QrcodeBarcodeScanner {
   /// A delayed action handler to handle delayed events.
   final DelayedActionHandler _actionHandler;
 
-  Future<String?> getPlatformVersion() {
-    return QrcodeBarcodeScannerPlatform.instance.getPlatformVersion();
-  }
-
   /// Creates a new instance of [QrcodeBarcodeScanner].
   ///
   /// The [onScannedCallback] parameter is a required callback function
@@ -48,11 +45,15 @@ class QrcodeBarcodeScanner {
     _controller.stream.where((char) => char != null).listen(onKeyEvent);
   }
 
+  /// Retrieves the platform version from the native platform.
+  Future<String?> getPlatformVersion() {
+    return QrcodeBarcodeScannerPlatform.instance.getPlatformVersion();
+  }
+
   /// Handles a keyboard event by adding the read character to the [_pressedKeys] list.
   ///
   /// [readChar] is the character read from the keyboard. If [readChar] is not null, it is added to the
-  /// [_pressedKeys] list. If [_pressedKeys] is not empty, it is joined together to form a string [scannedCode].
-  /// The [scannedCode] is passed to the [onScannedCallback] function and the [_pressedKeys] list is cleared.
+  /// [_pressedKeys] list. After a short delay, the pressed keys are combined into a scanned code.
   void onKeyEvent(String? readChar) {
     if (readChar != null) {
       _pressedKeys.add(readChar);
@@ -65,18 +66,25 @@ class QrcodeBarcodeScanner {
     }
   }
 
+  /// Cancels the currently scheduled scan action, if any.
+  ///
+  /// This method can be used to cancel any pending scan action, preventing the callback
+  /// from being triggered.
+  void cancelScan() {
+    _actionHandler.cancelDelayed();
+    _pressedKeys.clear();
+  }
+
   /// The callback function that is called when a keyboard event occurs.
   ///
   /// [event] is the raw keyboard event that occurred.
   bool _keyBoardCallback(KeyEvent event) {
     if (_isTextInputFocused()) {
-      return false; // Bypass scanner logic
+      return false; // Bypass scanner logic when text input is focused
     }
 
     // Check if the event contains a character and add it to the controller
-    if (event.character != null &&
-        event.character!.isNotEmpty &&
-        event.character!.codeUnits.any((unit) => unit != 0)) {
+    if (_isValidCharacter(event.character)) {
       _controller.add(event.character);
       return true;
     }
@@ -84,14 +92,19 @@ class QrcodeBarcodeScanner {
     return false;
   }
 
-  /// Checks if a text input field is focused.
+  /// Checks if the character is valid for scanning (non-null and non-empty).
+  bool _isValidCharacter(String? character) {
+    return character != null &&
+        character.isNotEmpty &&
+        character.codeUnits.any((unit) => unit != 0);
+  }
+
+  /// Checks if a text input field is currently focused.
   bool _isTextInputFocused() {
     final focus = FocusManager.instance.primaryFocus;
-    if (focus != null && focus.context != null) {
-      final context = focus.context!;
-      return context.findAncestorWidgetOfExactType<EditableText>() != null ||
-          context.findAncestorWidgetOfExactType<TextField>() != null ||
-          context.findAncestorWidgetOfExactType<TextFormField>() != null;
+    if (focus != null) {
+      return focus.context?.findAncestorWidgetOfExactType<EditableText>() !=
+          null;
     }
     return false;
   }

@@ -25,6 +25,8 @@ class DelayedActionHandler {
   }
 
   /// Cancels any scheduled action.
+  ///
+  /// This can be useful if the action is no longer needed.
   void cancelDelayed() {
     _timer?.cancel();
     _timer = null;
@@ -35,7 +37,17 @@ class DelayedActionHandler {
   ///
   /// If no action is scheduled, this method does nothing.
   void _performAction() {
-    _action?.call();
-    _action = null;
+    try {
+      _action?.call();
+    } catch (e) {
+      print('Error executing delayed action: $e');
+    } finally {
+      _action = null; // Clear the action after execution
+    }
+  }
+
+  /// Returns `true` if an action is currently scheduled, otherwise `false`.
+  bool isActionScheduled() {
+    return _timer?.isActive ?? false;
   }
 }
