@@ -5,40 +5,72 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: ThemeData(
+        primarySwatch: Colors.deepPurple,
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+        ),
+        inputDecorationTheme: const InputDecorationTheme(
+          border: OutlineInputBorder(),
+          labelStyle: TextStyle(color: Colors.deepPurple),
+        ),
+      ),
+      home: const ScannerDemo(),
+    );
+  }
 }
 
-class _MyAppState extends State<MyApp> {
-  String? _scanValue;
+class ScannerDemo extends StatefulWidget {
+  const ScannerDemo({super.key});
 
-  void setScannedValue(String value) {
-    setState(() {
-      _scanValue = value;
-    });
-  }
+  @override
+  State<ScannerDemo> createState() => _ScannerDemoState();
+}
+
+class _ScannerDemoState extends State<ScannerDemo> {
+  String? _scannedValue;
+  late QrcodeBarcodeScanner _scanner;
 
   @override
   void initState() {
     super.initState();
-    QrcodeBarcodeScanner(
+    // Initialize the scanner and set the callback for handling scanned values
+    _scanner = QrcodeBarcodeScanner(
       onScannedCallback: (String value) {
-        setScannedValue(value);
+        setState(() {
+          _scannedValue = value;
+        });
       },
     );
   }
 
   @override
+  void dispose() {
+    // Dispose the scanner when the widget is removed from the tree
+    _scanner.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Plugin example app'),
-        ),
-        body: Column(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('QR & Barcode Scanner Example'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
           children: [
             Expanded(
               child: Center(
@@ -46,11 +78,28 @@ class _MyAppState extends State<MyApp> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      "Scan value: ${_scanValue ?? 'none'}",
-                      style: const TextStyle(fontSize: 30),
+                      "Scanned value:",
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
-                    TextFormField(
-                      keyboardType: TextInputType.text,
+                    const SizedBox(height: 10),
+                    Text(
+                      _scannedValue ?? 'none',
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.deepPurple,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20.0),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          labelText: 'Focus here to disable scanner',
+                          hintText: 'Tap to focus',
+                        ),
+                        keyboardType: TextInputType.text,
+                      ),
                     ),
                   ],
                 ),
@@ -59,11 +108,11 @@ class _MyAppState extends State<MyApp> {
             ElevatedButton(
               onPressed: () {
                 setState(() {
-                  _scanValue = null;
+                  _scannedValue = null; // Clear the scanned value
                 });
               },
-              child: const Text("Clear scanned"),
-            )
+              child: const Text("Clear scanned value"),
+            ),
           ],
         ),
       ),
