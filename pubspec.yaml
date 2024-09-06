@@ -1,6 +1,6 @@
 name: qrcode_barcode_scanner
 description: Plugins to manage the reading of QR code or barcode from an external device as a keyboard.
-version: 3.0.2
+version: 3.0.3
 repository: "https://github.com/FrenkyDema/qrcode_barcode_scanner"
 
 environment:

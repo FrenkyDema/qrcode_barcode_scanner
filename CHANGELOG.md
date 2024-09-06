@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 3.0.3
+
+Refactoring doc
+
 ## 3.0.2
 
 Fix focus loss when text field is present
