@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
+
 /// A utility class that handles the execution of a delayed action.
 class DelayedActionHandler {
   /// The delay before the action is executed.
@@ -40,7 +42,7 @@ class DelayedActionHandler {
     try {
       _action?.call();
     } catch (e) {
-      print('Error executing delayed action: $e');
+      debugPrint('Error executing delayed action: $e');
     } finally {
       _action = null; // Clear the action after execution
     }
