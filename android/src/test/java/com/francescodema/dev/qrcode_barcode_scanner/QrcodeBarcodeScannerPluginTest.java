@@ -1,4 +1,4 @@
-package com.example.qrcode_barcode_scanner;
+package com.francescodema.dev.qrcode_barcode_scanner;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;

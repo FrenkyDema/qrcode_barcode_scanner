@@ -21,8 +21,9 @@ class MethodChannelQrcodeBarcodeScanner extends QrcodeBarcodeScannerPlatform {
   @override
   Future<String?> getPlatformVersion() async {
     try {
-      final version =
-          await methodChannel.invokeMethod<String>('getPlatformVersion');
+      final version = await methodChannel.invokeMethod<String>(
+        'getPlatformVersion',
+      );
       return version;
     } on PlatformException catch (e) {
       // Handle potential exceptions that may occur when invoking the method

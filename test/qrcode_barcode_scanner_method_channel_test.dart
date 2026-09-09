@@ -13,11 +13,11 @@ void main() {
     // Mocking the method channel to return specific values for the test
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-      if (methodCall.method == 'getPlatformVersion') {
-        return '42';
-      }
-      return null;
-    });
+          if (methodCall.method == 'getPlatformVersion') {
+            return '42';
+          }
+          return null;
+        });
   });
 
   tearDown(() {
@@ -35,8 +35,8 @@ void main() {
     // Simulating an unknown method call that should return null
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-      return null;
-    });
+          return null;
+        });
 
     final version = await platform.getPlatformVersion();
     expect(version, isNull);

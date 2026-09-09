@@ -1,2 +1,22 @@
 # Local configuration file (sdk path, etc)
 local.properties
+
+# Build and tool output
+build/
+.dart_tool/
+.gradle/
+.cxx/
+*.iml
+*.apk
+*.aab
+
+# IDE and CI
+.idea/
+.vscode/
+.github/
+.metadata
+
+# Example app artifacts that must never ship with the package
+example/.flutter-plugins
+example/.flutter-plugins-dependencies
+example/android/local.properties

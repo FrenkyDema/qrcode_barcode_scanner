@@ -6,14 +6,16 @@
 
 ### Overview
 
-The **QRCode & Barcode Scanner** plugin is designed to manage QR and Barcode scanning from external
-devices, offering a streamlined API for integration in Android applications.
+The **QRCode & Barcode Scanner** plugin manages QR and Barcode scanning from external "keyboard
+wedge" devices, offering a streamlined API for integration in Android applications.
 
 > **Important:** This package currently supports **Android** only.
 
 ### Features
 
 - **Simple Integration**: Use the `QrcodeBarcodeScanner` class to easily handle scan events.
+- **Layout independent**: Scanned values are decoded from the physical keys the scanner emits, so
+  they are not corrupted by the keyboard layout configured on the device.
 - **Customizable Callbacks**: Register custom callback functions to handle scanned data in
   real-time.
 - **Android Only**: This plugin is developed with Android compatibility in mind.
@@ -29,68 +31,116 @@ flutter pub add qrcode_barcode_scanner
 
 ### Usage Example
 
-Here is a simple example of how to use the `QrcodeBarcodeScanner`:
-
 ```dart
 import 'package:qrcode_barcode_scanner/qrcode_barcode_scanner.dart';
 
 class MyScannerApp extends StatefulWidget {
+  const MyScannerApp({super.key});
+
   @override
-  _MyScannerAppState createState() => _MyScannerAppState();
+  State<MyScannerApp> createState() => _MyScannerAppState();
 }
 
 class _MyScannerAppState extends State<MyScannerApp> {
   String? _scanValue;
+  late final QrcodeBarcodeScanner _scanner;
 
   @override
   void initState() {
     super.initState();
-    QrcodeBarcodeScanner(
+    _scanner = QrcodeBarcodeScanner(
       onScannedCallback: (String value) {
-        setState(() {
-          _scanValue = value;
-        });
+        setState(() => _scanValue = value);
       },
     );
   }
 
   @override
+  void dispose() {
+    _scanner.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("QR & Barcode Scanner")),
-      body: Center(
-        child: Text(_scanValue ?? "Waiting for scan..."),
-      ),
+      appBar: AppBar(title: const Text("QR & Barcode Scanner")),
+      body: Center(child: Text(_scanValue ?? "Waiting for scan...")),
     );
   }
 }
+```
+
+### Keyboard layouts
+
+A keyboard wedge scanner does not send text: it sends **key codes**, exactly like a physical
+keyboard. Virtually all of them are shipped configured for a **US layout**, while the device
+translates those key codes with the layout the user has selected. The two disagree on every key
+whose position differs, so the value silently changes:
+
+| Scanner sends | Read on an Italian layout | Read on a German layout |
+|---------------|---------------------------|-------------------------|
+| `=`           | `ì`                       | `´`                     |
+| `+`           | `]`                       | `*`                     |
+| `/`           | `-`                       | `-`                     |
+| `_`           | `?`                       | `?`                     |
+
+This breaks base64 payloads in particular, where `+`, `/` and the `=` padding are part of the
+alphabet — a QR code ending in `In0=` is read as `In0ì`.
+
+Since 4.0.0 the plugin decodes the **physical** key of each event through a US QWERTY table, so the
+scanned value is the same whatever layout the device uses. If your scanner is instead programmed
+with the same layout as the device, opt out:
+
+```dart
+QrcodeBarcodeScanner(
+  keyMapping: ScannerKeyMapping.platformCharacter,
+  onScannedCallback: (String value) { /* ... */ },
+);
 ```
 
 ### API Documentation
 
 #### Class: `QrcodeBarcodeScanner`
 
-The `QrcodeBarcodeScanner` class is the core component of this plugin. It allows you to configure
-and manage barcode and QR code scanning events.
-
 **Constructor:**
 
 ```dart
 QrcodeBarcodeScanner({
   required ScannedCallback onScannedCallback,
+  ScannerKeyMapping keyMapping = ScannerKeyMapping.usPhysicalLayout,
+  Duration scanDelay = const Duration(milliseconds: 100),
+  bool submitOnTerminator = true,
+  bool ignoreWhenTextInputFocused = true,
 });
 ```
 
-**Properties:**
+**Parameters:**
 
-- `onScannedCallback`: A callback function that is triggered when a scan is successful. Receives the
-  scanned value as a string.
+| Parameter                    | Default             | Description                                                                                                  |
+|------------------------------|---------------------|--------------------------------------------------------------------------------------------------------------|
+| `onScannedCallback`          | —                   | Called with the scanned value once the scan is complete.                                                       |
+| `keyMapping`                 | `usPhysicalLayout`  | How key events are turned into characters. See [Keyboard layouts](#keyboard-layouts).                          |
+| `scanDelay`                  | `100 ms`            | Idle time after the last key event before the scan is delivered.                                               |
+| `submitOnTerminator`         | `true`              | Deliver the scan as soon as the scanner sends its `Enter`/`Tab` suffix, without waiting for `scanDelay`.        |
+| `ignoreWhenTextInputFocused` | `true`              | Ignore key events while a text field owns the focus, so the scanner does not steal its input.                   |
+
+**Methods:**
+
+- `flush()`: delivers the scan in progress immediately.
+- `cancelScan()`: discards the scan in progress.
+- `dispose()`: releases the keyboard listener. Always call it when the scanner is no longer needed.
 
 ### Tested Devices
 
 This plugin has been tested with the following devices:
 
 - Sunmi Blink
+
+### Requirements
+
+- Dart `^3.8.0`, Flutter `>=3.32.0`
+- Android `minSdk` 24, `compileSdk` 36
 
 ### Additional Resources
 
