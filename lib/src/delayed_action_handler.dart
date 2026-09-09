@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 /// A utility class that handles the execution of a delayed action.
 class DelayedActionHandler {

@@ -1,5 +1,5 @@
-group 'com.example.qrcode_barcode_scanner'
-version '1.0'
+group = 'com.francescodema.dev.qrcode_barcode_scanner'
+version = '1.0'
 
 buildscript {
     repositories {
@@ -8,7 +8,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.1'
+        classpath 'com.android.tools.build:gradle:8.11.1'
     }
 }
 
@@ -22,33 +22,32 @@ rootProject.allprojects {
 apply plugin: 'com.android.library'
 
 android {
-    if (project.android.hasProperty("namespace")) {
-        namespace 'com.example.qrcode_barcode_scanner'
-    }
+    namespace = 'com.francescodema.dev.qrcode_barcode_scanner'
 
-    compileSdk 34
+    compileSdk = 36
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     defaultConfig {
-        minSdkVersion 19
-    }
-
-    dependencies {
-        testImplementation 'junit:junit:4.13.2'
-        testImplementation 'org.mockito:mockito-core:5.0.0'
+        minSdk = 24
     }
 
     testOptions {
         unitTests.all {
-            testLogging {
-               events "passed", "skipped", "failed", "standardOut", "standardError"
-               outputs.upToDateWhen {false}
-               showStandardStreams = true
+            it.outputs.upToDateWhen { false }
+
+            it.testLogging {
+                events 'passed', 'skipped', 'failed', 'standardOut', 'standardError'
+                showStandardStreams = true
             }
         }
     }
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:5.14.2'
 }

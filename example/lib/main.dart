@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:qrcode_barcode_scanner/qrcode_barcode_scanner.dart';
 
@@ -11,19 +13,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'QR & Barcode Scanner',
       theme: ThemeData(
-        primarySwatch: Colors.deepPurple,
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-          ),
-        ),
+        colorSchemeSeed: Colors.deepPurple,
         inputDecorationTheme: const InputDecorationTheme(
           border: OutlineInputBorder(),
-          labelStyle: TextStyle(color: Colors.deepPurple),
         ),
       ),
       home: const ScannerDemo(),
@@ -40,19 +34,32 @@ class ScannerDemo extends StatefulWidget {
 
 class _ScannerDemoState extends State<ScannerDemo> {
   String? _scannedValue;
+  ScannerKeyMapping _keyMapping = ScannerKeyMapping.usPhysicalLayout;
   late QrcodeBarcodeScanner _scanner;
 
   @override
   void initState() {
     super.initState();
-    // Initialize the scanner and set the callback for handling scanned values
-    _scanner = QrcodeBarcodeScanner(
+    _scanner = _createScanner();
+  }
+
+  QrcodeBarcodeScanner _createScanner() {
+    return QrcodeBarcodeScanner(
+      keyMapping: _keyMapping,
       onScannedCallback: (String value) {
-        setState(() {
-          _scannedValue = value;
-        });
+        setState(() => _scannedValue = value);
       },
     );
+  }
+
+  /// Recreates the scanner so the demo can be switched between the layout
+  /// independent decoding and the raw characters reported by the platform.
+  void _setKeyMapping(ScannerKeyMapping mapping) {
+    setState(() {
+      _scanner.dispose();
+      _keyMapping = mapping;
+      _scanner = _createScanner();
+    });
   }
 
   @override
@@ -62,59 +69,96 @@ class _ScannerDemoState extends State<ScannerDemo> {
     super.dispose();
   }
 
+  /// Decodes [value] as base64 text, or returns `null` when it is not base64.
+  String? _base64Preview(String value) {
+    try {
+      return utf8.decode(base64.decode(value));
+    } on FormatException {
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final String? value = _scannedValue;
+    final String? preview = value == null ? null : _base64Preview(value);
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('QR & Barcode Scanner Example'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      "Scanned value:",
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      _scannedValue ?? 'none',
-                      style: const TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.deepPurple,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20.0),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          labelText: 'Focus here to disable scanner',
-                          hintText: 'Tap to focus',
-                        ),
-                        keyboardType: TextInputType.text,
-                      ),
-                    ),
-                  ],
+      appBar: AppBar(title: const Text('QR & Barcode Scanner Example')),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: <Widget>[
+          SegmentedButton<ScannerKeyMapping>(
+            segments: const <ButtonSegment<ScannerKeyMapping>>[
+              ButtonSegment<ScannerKeyMapping>(
+                value: ScannerKeyMapping.usPhysicalLayout,
+                label: Text('US layout'),
+                icon: Icon(Icons.keyboard),
+              ),
+              ButtonSegment<ScannerKeyMapping>(
+                value: ScannerKeyMapping.platformCharacter,
+                label: Text('OS character'),
+                icon: Icon(Icons.language),
+              ),
+            ],
+            selected: <ScannerKeyMapping>{_keyMapping},
+            onSelectionChanged: (Set<ScannerKeyMapping> selection) =>
+                _setKeyMapping(selection.first),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Switch to "OS character" to see how a non-US keyboard layout '
+            'corrupts characters such as = + / on the device.',
+            style: theme.textTheme.bodySmall,
+          ),
+          const SizedBox(height: 24),
+          Text('Scanned value', style: theme.textTheme.titleMedium),
+          const SizedBox(height: 8),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: SelectableText(
+                value ?? 'Waiting for a scan…',
+                style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
+              ),
+            ),
+          ),
+          if (value != null) ...<Widget>[
+            const SizedBox(height: 8),
+            Text(
+              '${value.length} characters',
+              style: theme.textTheme.bodySmall,
+            ),
+          ],
+          if (preview != null) ...<Widget>[
+            const SizedBox(height: 16),
+            Text('Decoded as base64', style: theme.textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Card(
+              color: theme.colorScheme.secondaryContainer,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: SelectableText(
+                  preview,
+                  style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
                 ),
               ),
             ),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  _scannedValue = null; // Clear the scanned value
-                });
-              },
-              child: const Text("Clear scanned value"),
-            ),
           ],
-        ),
+          const SizedBox(height: 24),
+          const TextField(
+            decoration: InputDecoration(
+              labelText: 'Focus here to disable the scanner',
+              hintText: 'Tap to focus',
+            ),
+          ),
+          const SizedBox(height: 16),
+          FilledButton.tonal(
+            onPressed: () => setState(() => _scannedValue = null),
+            child: const Text('Clear scanned value'),
+          ),
+        ],
       ),
     );
   }
